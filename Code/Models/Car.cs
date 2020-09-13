@@ -6,10 +6,10 @@ namespace L1a.Models
 {
     public class Car : IParsable
     {
-        public string Model { get; private set; }
-        public decimal Price { get; private set; }
-        public int Period { get; private set; }
-        public decimal InitialPayment { get; private set; }
+        public string Model { get; set; }
+        public decimal Price { get; set; }
+        public int Period { get; set; }
+        public decimal InitialPayment { get; set; }
         //public decimal MonthlyPayment => CalculateMonthlyPayment();
 
         private const decimal _contractPrice = 300;

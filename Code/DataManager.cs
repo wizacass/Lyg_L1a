@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace L1a.code
 {
-    static class DataFactory<T> where T : IParsable, new()
+    static class DataManager<T> where T : IParsable, new()
     {
         public static T[] CreateDataset(int count)
         {
@@ -23,6 +23,13 @@ namespace L1a.code
             string data = JsonConvert.SerializeObject(objects);
             using var writer = new StreamWriter(filename);
             writer.WriteLine(data);
+        }
+
+        public static T[] DeserializeArray(string filename)
+        {
+            string text = File.ReadAllText(filename);
+            var data = JsonConvert.DeserializeObject<T[]>(text);
+            return data;
         }
     }
 }
