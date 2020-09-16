@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using L1a.code;
-using L1a.Interfaces;
+using L1a.Code;
 using L1a.Models;
 
 namespace L1a
@@ -11,12 +11,11 @@ namespace L1a
     class Program
     {
         private const string FilenameTemplate = "Data/IFF8-1_PetrauskasV_L1_dat_{0}.json";
-        private const int DatasetCount = 3;
-        private const int SamplesCount = 25;
+        private const int DatasetCount = 1;
+        private const int SamplesCount = 50;
+        private const decimal Threshold = 5000;
 
         private Random _rnd;
-        private IDataMonitor<Car> _dataMonitor;
-        private ISortedResultMonitor<Car> _resultsMonitor;
 
         public Program()
         {
@@ -35,14 +34,40 @@ namespace L1a
 
         private void Execute(Car[] cars, int threadCount = -1)
         {
-
-            if (threadCount < 0 || !ValidateThreadCount(threadCount, cars.Length))
+            if (threadCount <= 0 || !ValidateThreadCount(threadCount, cars.Length))
             {
                 threadCount = _rnd.Next(2, cars.Length / 4);
             }
 
             System.Console.WriteLine($"Running with {threadCount} threads");
-            System.Console.WriteLine(cars.Length);
+
+            var queue = new Queue<Car>(cars);
+            var dataMonitor = new DataMonitor<Car>(cars.Length / 2);
+            var runner = new Runner<Car>(threadCount);
+
+            while (!dataMonitor.IsFull)
+            {
+                var item = queue.Dequeue();
+                try
+                {
+                    dataMonitor.AddItem(item);
+                }
+                catch (Exception ex)
+                {
+                    System.Console.WriteLine(ex.Message);
+                    queue.Enqueue(item);
+                    //break;
+                }
+            }
+
+            runner.PrepareThreads(dataMonitor, Threshold);
+            runner.StartThreads();
+            runner.FinishThreads();
+
+            //System.Console.WriteLine($"Monitor is {(dataMonitor.IsEmpty ? "Empty" : "Full")}.");
+            //System.Console.WriteLine(cars.Length);
+
+            System.Console.WriteLine();
         }
 
         private bool ValidateThreadCount(int count, int length)
@@ -56,7 +81,7 @@ namespace L1a
             {
                 string filename = String.Format(FilenameTemplate, i);
                 var cars = DataManager<Car>.DeserializeArray(filename);
-                Execute(cars);
+                Execute(cars, 2);
             }
         }
 
@@ -66,7 +91,7 @@ namespace L1a
             //p.GenerateData();
             p.Run();
 
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Program finished execution");
         }
     }
 }

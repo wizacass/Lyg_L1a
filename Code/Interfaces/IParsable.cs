@@ -1,4 +1,4 @@
-namespace L1a.code.Interfaces
+namespace L1a.Code.Interfaces
 {
     public interface IParsable
     {

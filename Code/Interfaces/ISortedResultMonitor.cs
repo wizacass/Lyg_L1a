@@ -1,4 +1,4 @@
-namespace L1a.Interfaces
+namespace L1a.Code.Interfaces
 {
     public interface ISortedResultMonitor<T>
     {
