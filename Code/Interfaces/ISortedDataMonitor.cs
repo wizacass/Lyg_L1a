@@ -1,6 +1,6 @@
 namespace L1a.Code.Interfaces
 {
-    public interface ISortedResultMonitor<T>
+    public interface ISortedDataMonitor<T>
     {
         void AddItemSorted(T item);
 

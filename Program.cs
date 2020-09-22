@@ -43,6 +43,7 @@ namespace L1a
 
             var queue = new Queue<Car>(cars);
             var dataMonitor = new DataMonitor<Car>(cars.Length / 2);
+            var resultsMonitor = new SortedDataMonitor<Car>(cars.Length);
             var runner = new Runner<Car>(threadCount);
 
             while (!dataMonitor.IsFull)
@@ -60,12 +61,13 @@ namespace L1a
                 }
             }
 
-            runner.PrepareThreads(dataMonitor, Threshold);
+            runner.PrepareThreads(dataMonitor, resultsMonitor, Threshold);
             runner.StartThreads();
             runner.FinishThreads();
 
             //System.Console.WriteLine($"Monitor is {(dataMonitor.IsEmpty ? "Empty" : "Full")}.");
             //System.Console.WriteLine(cars.Length);
+            var sortedItems = resultsMonitor.getItems();
 
             System.Console.WriteLine();
         }

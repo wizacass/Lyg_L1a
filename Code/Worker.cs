@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using L1a.Code.Interfaces;
 
 namespace L1a.code
@@ -7,13 +8,13 @@ namespace L1a.code
     {
         private decimal _threshold;
         private readonly IDataMonitor<T> _dataMonitor;
-        //private readonly ISortedResultMonitor<T> _resultMonitor;
+        private readonly ISortedDataMonitor<T> _resultMonitor;
         public int _counter = 0;
 
-        public Worker(IDataMonitor<T> dataMonitor, /*ISortedResultMonitor<T> resultMonitor, */decimal threshold)
+        public Worker(IDataMonitor<T> dataMonitor, ISortedDataMonitor<T> resultMonitor, decimal threshold)
         {
             _dataMonitor = dataMonitor;
-            //_resultMonitor = resultMonitor;
+            _resultMonitor = resultMonitor;
             _threshold = threshold;
         }
 
@@ -21,6 +22,12 @@ namespace L1a.code
         {
             while (!_dataMonitor.IsEmpty)
             {
+                // if (!_dataMonitor.IsInitialized)
+                // {
+                //     Thread.Sleep(1);
+                //     continue;
+                // }
+
                 try
                 {
                     var item = _dataMonitor.RemoveItem();
@@ -28,8 +35,7 @@ namespace L1a.code
                     _counter++;
                     if (item.ComputedValue() <= _threshold)
                     {
-                        //System.Console.WriteLine("Adding item to results monitor!");
-                        //_resultMonitor.AddItemSorted(item);
+                        _resultMonitor.AddItemSorted(item);
                     }
                 }
                 catch (Exception ex)

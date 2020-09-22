@@ -14,11 +14,11 @@ namespace L1a.code
             _threads = new Thread[count];
         }
 
-        public void PrepareThreads(IDataMonitor<T> dataMonitor, decimal threshold)
+        public void PrepareThreads(IDataMonitor<T> dataMonitor, ISortedDataMonitor<T> resultsMonitor, decimal threshold)
         {
             for (int i = 0; i < _threads.Length; i++)
             {
-                var worker = new Worker<T>(dataMonitor, threshold);
+                var worker = new Worker<T>(dataMonitor, resultsMonitor, threshold);
                 _threads[i] = new Thread(worker.Work);
             }
         }

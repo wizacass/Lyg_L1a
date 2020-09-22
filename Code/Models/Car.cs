@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace L1a.Models
 {
-    public class Car : IParsable, IComputable
+    public class Car : IParsable, IComputable, IComparable
     {
         public string Model { get; set; }
         public decimal Price { get; set; }
@@ -41,6 +41,13 @@ namespace L1a.Models
 
             return Math.Round(monthlyPayment);
         }
+
+        public int CompareTo(object obj)
+        {
+            var other = obj as Car;
+            return this.ComputedValue().CompareTo(other.ComputedValue());
+        }
+
 
         public override string ToString()
         {
