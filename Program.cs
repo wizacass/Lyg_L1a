@@ -24,6 +24,21 @@ namespace L1a
 
         private void GenerateData()
         {
+            string f1 = String.Format(FilenameTemplate, 1);
+            string f2 = String.Format(FilenameTemplate, 1);
+            string f3 = String.Format(FilenameTemplate, 1);
+            var ds1a = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.LessThan);
+            var ds1b = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.GreaterThan);
+            var ds1 = ds1a.Concat(ds1b).OrderBy(x => _rnd.Next()).ToArray();
+            var ds2 = DataManager<Car>.CreateDataset(SamplesCount, Threshold, Criteria.LessThan);
+            var ds3 = DataManager<Car>.CreateDataset(SamplesCount, Threshold, Criteria.GreaterThan);
+            DataManager<Car>.SerializeArray(ds1, f1);
+            DataManager<Car>.SerializeArray(ds2, f2);
+            DataManager<Car>.SerializeArray(ds3, f3);
+        }
+
+        private void GenerateRandomData()
+        {
             for (int i = 1; i <= DatasetCount; i++)
             {
                 string filename = String.Format(FilenameTemplate, i);

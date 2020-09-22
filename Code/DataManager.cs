@@ -4,7 +4,13 @@ using Newtonsoft.Json;
 
 namespace L1a.code
 {
-    static class DataManager<T> where T : IParsable, new()
+    enum Criteria
+    {
+        LessThan = -1,
+        GreaterThan = 1
+    }
+
+    static class DataManager<T> where T : IParsable, IComputable, new()
     {
         public static T[] CreateDataset(int count)
         {
@@ -13,6 +19,24 @@ namespace L1a.code
             {
                 var obj = new T();
                 obj.InitializeRandom();
+                objects[i] = obj;
+            }
+            return objects;
+        }
+
+        public static T[] CreateDataset(int count, decimal threshlod, Criteria criteria)
+        {
+            var objects = new T[count];
+            for (int i = 0; i < count; i++)
+            {
+                T obj;
+                do
+                {
+                    obj = new T();
+                    obj.InitializeRandom();
+                }
+                while (obj.ComputedValue().CompareTo(threshlod) != (int)criteria);
+
                 objects[i] = obj;
             }
             return objects;
