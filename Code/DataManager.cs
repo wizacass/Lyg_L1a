@@ -14,7 +14,7 @@ namespace L1a.code
 
     internal static class DataManager<T> where T : IParsable, IComputable, new()
     {
-        private static readonly int[] Lenghts = {8, 10, 4, 10, 9};
+        private static readonly int[] Lenghts = { 8, 10, 4, 10, 9 };
 
         public static T[] CreateDataset(int count)
         {
@@ -39,7 +39,7 @@ namespace L1a.code
                 {
                     obj = new T();
                     obj.InitializeRandom();
-                } while (obj.ComputedValue().CompareTo(threshold) != (int) criteria);
+                } while (obj.ComputedValue().CompareTo(threshold) != (int)criteria);
 
                 objects[i] = obj;
             }
@@ -85,6 +85,7 @@ namespace L1a.code
             }
 
             writer.WriteLine(TableSeparator());
+            writer.WriteLine($"Total elements: {data.Length}");
         }
 
         private static string TableSeparator()
