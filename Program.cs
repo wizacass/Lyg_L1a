@@ -11,7 +11,7 @@ namespace L1a
     class Program
     {
         private const string FilenameTemplate = "Data/IFF8-1_PetrauskasV_L1_dat_{0}.json";
-        private const int DatasetCount = 1;
+        private const int DatasetCount = 3;
         private const int SamplesCount = 50;
         private const decimal Threshold = 5000;
 
@@ -25,8 +25,8 @@ namespace L1a
         private void GenerateData()
         {
             string f1 = String.Format(FilenameTemplate, 1);
-            string f2 = String.Format(FilenameTemplate, 1);
-            string f3 = String.Format(FilenameTemplate, 1);
+            string f2 = String.Format(FilenameTemplate, 2);
+            string f3 = String.Format(FilenameTemplate, 3);
             var ds1a = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.LessThan);
             var ds1b = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.GreaterThan);
             var ds1 = ds1a.Concat(ds1b).OrderBy(x => _rnd.Next()).ToArray();
@@ -61,29 +61,29 @@ namespace L1a
             var resultsMonitor = new SortedDataMonitor<Car>(cars.Length);
             var runner = new Runner<Car>(threadCount);
 
-            while (!dataMonitor.IsFull)
+            runner.PrepareThreads(dataMonitor, resultsMonitor, Threshold);
+            runner.StartThreads();
+
+            while (queue.Count > 0)
             {
                 var item = queue.Dequeue();
                 try
                 {
                     dataMonitor.AddItem(item);
+                    if (queue.Count == 0) dataMonitor.IsFinal = true;
                 }
                 catch (Exception ex)
                 {
                     System.Console.WriteLine(ex.Message);
                     queue.Enqueue(item);
-                    //break;
                 }
             }
 
-            runner.PrepareThreads(dataMonitor, resultsMonitor, Threshold);
-            runner.StartThreads();
             runner.FinishThreads();
 
-            //System.Console.WriteLine($"Monitor is {(dataMonitor.IsEmpty ? "Empty" : "Full")}.");
-            //System.Console.WriteLine(cars.Length);
             var sortedItems = resultsMonitor.getItems();
 
+            System.Console.WriteLine($"Sorted: {sortedItems.Length}");
             System.Console.WriteLine();
         }
 
@@ -98,7 +98,8 @@ namespace L1a
             {
                 string filename = String.Format(FilenameTemplate, i);
                 var cars = DataManager<Car>.DeserializeArray(filename);
-                Execute(cars, 2);
+                Execute(cars);
+                System.Console.WriteLine("------------------------------");
             }
         }
 

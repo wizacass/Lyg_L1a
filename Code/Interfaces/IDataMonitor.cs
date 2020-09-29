@@ -6,6 +6,8 @@ namespace L1a.Code.Interfaces
 
         bool IsFull { get; }
 
+        bool IsFinal { get; set; }
+
         void AddItem(T item);
 
         T RemoveItem();

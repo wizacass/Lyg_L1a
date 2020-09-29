@@ -1,10 +1,12 @@
 using System;
+using System.Threading;
 using L1a.Code.Interfaces;
 
 namespace L1a.Code
 {
     public class DataMonitor<T> : IDataMonitor<T>
     {
+        private bool _isFinal = false;
         private int _count = 0;
         private readonly T[] _items;
 
@@ -38,23 +40,45 @@ namespace L1a.Code
             }
         }
 
+        public bool IsFinal
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _isFinal;
+                }
+            }
+
+            set
+            {
+                lock (_lock)
+                {
+                    _isFinal = value;
+                    Monitor.PulseAll(_lock);
+                }
+            }
+        }
+
         public void AddItem(T item)
         {
-            if (IsFull) throw new Exception("Monitor is full!");
             lock (_lock)
             {
-                if (IsFull) throw new Exception("Monitor is full!");
+                while (IsFull) Monitor.Wait(_lock);
                 _items[_count++] = item;
+                Monitor.PulseAll(_lock);
             }
         }
 
         public T RemoveItem()
         {
-            if (IsEmpty) throw new Exception("Monitor is empty!");
             lock (_lock)
             {
-                if (IsEmpty) throw new Exception("Monitor is empty!");
-                return _items[--_count];
+                while (IsEmpty && !IsFinal) Monitor.Wait(_lock);
+                if (IsEmpty && IsFinal) throw new Exception("Data monitor is empty!");
+                var item = _items[--_count];
+                Monitor.PulseAll(_lock);
+                return item;
             }
         }
     }

@@ -1,5 +1,4 @@
 using System;
-using System.Threading;
 using L1a.Code.Interfaces;
 
 namespace L1a.code
@@ -20,18 +19,11 @@ namespace L1a.code
 
         public void Work()
         {
-            while (!_dataMonitor.IsEmpty)
+            while (true)
             {
-                // if (!_dataMonitor.IsInitialized)
-                // {
-                //     Thread.Sleep(1);
-                //     continue;
-                // }
-
                 try
                 {
                     var item = _dataMonitor.RemoveItem();
-                    System.Console.WriteLine($"Value: {item.ComputedValue()}");
                     _counter++;
                     if (item.ComputedValue() <= _threshold)
                     {
@@ -41,8 +33,13 @@ namespace L1a.code
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    //throw;
                 }
+
+                if (_dataMonitor.IsEmpty && _dataMonitor.IsFinal)
+                {
+                    break;
+                }
+
             }
             System.Console.WriteLine($"Done! Processed {_counter} items.");
         }

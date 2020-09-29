@@ -1,7 +1,5 @@
-using System;
 using System.Threading;
 using L1a.Code.Interfaces;
-using L1a.Models;
 
 namespace L1a.code
 {
