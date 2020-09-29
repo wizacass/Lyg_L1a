@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using L1a.code;
 using L1a.Code;
@@ -7,30 +8,32 @@ using L1a.Models;
 
 namespace L1a
 {
-    class Program
+    internal class Program
     {
-        private const string DatafileTemplate = "Data/IFF8-1_PetrauskasV_L1_dat_{0}.json";
-        private const string ResultsFileTemplate = "Data/IFF8-1_PetrauskasV_L1_rez_{0}.txt";
+        private const string DataDirectory = "Data";
 
         private const int DatasetCount = 3;
         private const int SamplesCount = 50;
         private const decimal Threshold = 5000;
 
-        private Random _rnd;
+        private readonly string _datafileTemplate = $"{DataDirectory}/IFF8-1_PetrauskasV_L1_dat_{0}.json";
+        private readonly string _resultsFileTemplate = $"{DataDirectory}/IFF8-1_PetrauskasV_L1_rez_{0}.txt";
 
-        public Program()
+        private readonly Random _rnd;
+
+        private Program()
         {
             _rnd = new Random();
         }
 
         private void GenerateData()
         {
-            string f1 = String.Format(DatafileTemplate, 1);
-            string f2 = String.Format(DatafileTemplate, 2);
-            string f3 = String.Format(DatafileTemplate, 3);
-            var ds1a = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.LessThan);
-            var ds1b = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.GreaterThan);
-            var ds1 = ds1a.Concat(ds1b).OrderBy(x => _rnd.Next()).ToArray();
+            string f1 = string.Format(_datafileTemplate, 1);
+            string f2 = string.Format(_datafileTemplate, 2);
+            string f3 = string.Format(_datafileTemplate, 3);
+            var ds1A = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.LessThan);
+            var ds1B = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.GreaterThan);
+            var ds1 = ds1A.Concat(ds1B).OrderBy(x => _rnd.Next()).ToArray();
             var ds2 = DataManager<Car>.CreateDataset(SamplesCount, Threshold, Criteria.LessThan);
             var ds3 = DataManager<Car>.CreateDataset(SamplesCount, Threshold, Criteria.GreaterThan);
             DataManager<Car>.SerializeArray(ds1, f1);
@@ -42,7 +45,7 @@ namespace L1a
         {
             for (int i = 1; i <= DatasetCount; i++)
             {
-                string filename = String.Format(DatafileTemplate, i);
+                string filename = string.Format(_datafileTemplate, i);
                 var objects = DataManager<Car>.CreateDataset(SamplesCount);
                 DataManager<Car>.SerializeArray(objects, filename);
             }
@@ -55,7 +58,7 @@ namespace L1a
                 threadCount = _rnd.Next(2, cars.Length / 4);
             }
 
-            System.Console.WriteLine($"Running with {threadCount} threads");
+            Console.WriteLine($"Running with {threadCount} threads");
 
             var queue = new Queue<Car>(cars);
             var dataMonitor = new DataMonitor<Car>(cars.Length / 2);
@@ -75,17 +78,17 @@ namespace L1a
                 }
                 catch (Exception ex)
                 {
-                    System.Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Message);
                     queue.Enqueue(item);
                 }
             }
 
             runner.FinishThreads();
 
-            return resultsMonitor.getItems();
+            return resultsMonitor.GetItems();
         }
 
-        private bool ValidateThreadCount(int count, int length)
+        private static bool ValidateThreadCount(int count, int length)
         {
             return count >= 2 && count <= (length / 4);
         }
@@ -94,8 +97,8 @@ namespace L1a
         {
             for (int i = 1; i <= DatasetCount; i++)
             {
-                string datafile = String.Format(DatafileTemplate, i);
-                string resultsFile = String.Format(ResultsFileTemplate, i);
+                string datafile = string.Format(_datafileTemplate, i);
+                string resultsFile = string.Format(_resultsFileTemplate, i);
                 var cars = DataManager<Car>.DeserializeArray(datafile);
                 var sortedCars = Execute(cars, threadCount);
                 string header = $"| {"Model",-6} | {"Price",-8} | P. | {"Initial",-8} | Monthly |";
@@ -105,10 +108,12 @@ namespace L1a
             }
         }
 
-        static void Main(string[] args)
+        private static void Main()
         {
+            Directory.CreateDirectory(DataDirectory);
+
             var p = new Program();
-            //p.GenerateData();
+            p.GenerateData();
             p.Run();
 
             Console.WriteLine("Program finished execution");

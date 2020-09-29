@@ -4,6 +4,6 @@ namespace L1a.Code.Interfaces
     {
         void AddItemSorted(T item);
 
-        T[] getItems();
+        T[] GetItems();
     }
 }

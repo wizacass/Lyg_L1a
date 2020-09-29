@@ -6,11 +6,11 @@ namespace L1a.Code
 {
     public class DataMonitor<T> : IDataMonitor<T>
     {
-        private bool _isFinal = false;
-        private int _count = 0;
+        private bool _isFinal;
+        private int _count;
         private readonly T[] _items;
 
-        private static readonly object _lock = new object();
+        private static readonly object Lock = new object();
 
         public DataMonitor(int count)
         {
@@ -22,7 +22,7 @@ namespace L1a.Code
         {
             get
             {
-                lock (_lock)
+                lock (Lock)
                 {
                     return _count == 0;
                 }
@@ -33,7 +33,7 @@ namespace L1a.Code
         {
             get
             {
-                lock (_lock)
+                lock (Lock)
                 {
                     return _count == _items.Length;
                 }
@@ -44,7 +44,7 @@ namespace L1a.Code
         {
             get
             {
-                lock (_lock)
+                lock (Lock)
                 {
                     return _isFinal;
                 }
@@ -52,32 +52,32 @@ namespace L1a.Code
 
             set
             {
-                lock (_lock)
+                lock (Lock)
                 {
                     _isFinal = value;
-                    Monitor.PulseAll(_lock);
+                    Monitor.PulseAll(Lock);
                 }
             }
         }
 
         public void AddItem(T item)
         {
-            lock (_lock)
+            lock (Lock)
             {
-                while (IsFull) Monitor.Wait(_lock);
+                while (IsFull) Monitor.Wait(Lock);
                 _items[_count++] = item;
-                Monitor.PulseAll(_lock);
+                Monitor.PulseAll(Lock);
             }
         }
 
         public T RemoveItem()
         {
-            lock (_lock)
+            lock (Lock)
             {
-                while (IsEmpty && !IsFinal) Monitor.Wait(_lock);
+                while (IsEmpty && !IsFinal) Monitor.Wait(Lock);
                 if (IsEmpty && IsFinal) throw new Exception("Data monitor is empty!");
                 var item = _items[--_count];
-                Monitor.PulseAll(_lock);
+                Monitor.PulseAll(Lock);
                 return item;
             }
         }

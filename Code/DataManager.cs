@@ -6,15 +6,15 @@ using Newtonsoft.Json;
 
 namespace L1a.code
 {
-    enum Criteria
+    internal enum Criteria
     {
         LessThan = -1,
         GreaterThan = 1
     }
 
-    static class DataManager<T> where T : IParsable, IComputable, new()
+    internal static class DataManager<T> where T : IParsable, IComputable, new()
     {
-        private static int[] Lenghts = { 8, 10, 4, 10, 9 };
+        private static readonly int[] Lenghts = {8, 10, 4, 10, 9};
 
         public static T[] CreateDataset(int count)
         {
@@ -25,10 +25,11 @@ namespace L1a.code
                 obj.InitializeRandom();
                 objects[i] = obj;
             }
+
             return objects;
         }
 
-        public static T[] CreateDataset(int count, decimal threshlod, Criteria criteria)
+        public static T[] CreateDataset(int count, decimal threshold, Criteria criteria)
         {
             var objects = new T[count];
             for (int i = 0; i < count; i++)
@@ -38,11 +39,11 @@ namespace L1a.code
                 {
                     obj = new T();
                     obj.InitializeRandom();
-                }
-                while (obj.ComputedValue().CompareTo(threshlod) != (int)criteria);
+                } while (obj.ComputedValue().CompareTo(threshold) != (int) criteria);
 
                 objects[i] = obj;
             }
+
             return objects;
         }
 
@@ -68,6 +69,7 @@ namespace L1a.code
                 writer.WriteLine(TableSeparator());
                 writer.WriteLine(header);
             }
+
             writer.WriteLine(TableSeparator());
             if (data.Length == 0)
             {
@@ -81,6 +83,7 @@ namespace L1a.code
             {
                 writer.WriteLine(item.ToTableRow());
             }
+
             writer.WriteLine(TableSeparator());
         }
 

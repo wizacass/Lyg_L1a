@@ -11,8 +11,8 @@ namespace L1a.Models
         public int Period { get; set; }
         public decimal InitialPayment { get; set; }
 
-        private const decimal _contractPrice = 300;
-        private const float _interestRate = 0.03f;
+        private const decimal ContractPrice = 300;
+        private const float InterestRate = 0.03f;
 
         public Car() { }
 
@@ -36,7 +36,7 @@ namespace L1a.Models
         public decimal ComputedValue()
         {
             decimal realPrice = Price - InitialPayment;
-            decimal fullPrice = realPrice * (Decimal)Math.Pow((1 + _interestRate), Period) + _contractPrice;
+            decimal fullPrice = realPrice * (decimal)Math.Pow((1 + InterestRate), Period) + ContractPrice;
             decimal monthlyPayment = fullPrice / Period;
 
             return Math.Round(monthlyPayment);
@@ -45,7 +45,7 @@ namespace L1a.Models
         public int CompareTo(object obj)
         {
             var other = obj as Car;
-            return this.ComputedValue().CompareTo(other.ComputedValue());
+            return ComputedValue().CompareTo(other.ComputedValue());
         }
 
         public string ToTableRow()

@@ -5,10 +5,10 @@ namespace L1a.code
 {
     public class Worker<T> where T : IComputable
     {
-        private decimal _threshold;
+        private readonly decimal _threshold;
         private readonly IDataMonitor<T> _dataMonitor;
         private readonly ISortedDataMonitor<T> _resultMonitor;
-        public int _counter = 0;
+        private int _counter;
 
         public Worker(IDataMonitor<T> dataMonitor, ISortedDataMonitor<T> resultMonitor, decimal threshold)
         {
@@ -39,9 +39,9 @@ namespace L1a.code
                 {
                     break;
                 }
-
             }
-            System.Console.WriteLine($"Done! Processed {_counter} items.");
+
+            Console.WriteLine($"Done! Processed {_counter} items.");
         }
     }
 }
