@@ -9,7 +9,9 @@ namespace L1a
 {
     class Program
     {
-        private const string FilenameTemplate = "Data/IFF8-1_PetrauskasV_L1_dat_{0}.json";
+        private const string DatafileTemplate = "Data/IFF8-1_PetrauskasV_L1_dat_{0}.json";
+        private const string ResultsFileTemplate = "Data/IFF8-1_PetrauskasV_L1_rez_{0}.txt";
+
         private const int DatasetCount = 3;
         private const int SamplesCount = 50;
         private const decimal Threshold = 5000;
@@ -23,9 +25,9 @@ namespace L1a
 
         private void GenerateData()
         {
-            string f1 = String.Format(FilenameTemplate, 1);
-            string f2 = String.Format(FilenameTemplate, 2);
-            string f3 = String.Format(FilenameTemplate, 3);
+            string f1 = String.Format(DatafileTemplate, 1);
+            string f2 = String.Format(DatafileTemplate, 2);
+            string f3 = String.Format(DatafileTemplate, 3);
             var ds1a = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.LessThan);
             var ds1b = DataManager<Car>.CreateDataset(SamplesCount / 2, Threshold, Criteria.GreaterThan);
             var ds1 = ds1a.Concat(ds1b).OrderBy(x => _rnd.Next()).ToArray();
@@ -40,13 +42,13 @@ namespace L1a
         {
             for (int i = 1; i <= DatasetCount; i++)
             {
-                string filename = String.Format(FilenameTemplate, i);
+                string filename = String.Format(DatafileTemplate, i);
                 var objects = DataManager<Car>.CreateDataset(SamplesCount);
                 DataManager<Car>.SerializeArray(objects, filename);
             }
         }
 
-        private void Execute(Car[] cars, int threadCount = -1)
+        private Car[] Execute(Car[] cars, int threadCount = -1)
         {
             if (threadCount <= 0 || !ValidateThreadCount(threadCount, cars.Length))
             {
@@ -80,10 +82,7 @@ namespace L1a
 
             runner.FinishThreads();
 
-            var sortedItems = resultsMonitor.getItems();
-
-            System.Console.WriteLine($"Sorted: {sortedItems.Length}");
-            System.Console.WriteLine();
+            return resultsMonitor.getItems();
         }
 
         private bool ValidateThreadCount(int count, int length)
@@ -91,14 +90,18 @@ namespace L1a
             return count >= 2 && count <= (length / 4);
         }
 
-        private void Run()
+        private void Run(int threadCount = -1)
         {
             for (int i = 1; i <= DatasetCount; i++)
             {
-                string filename = String.Format(FilenameTemplate, i);
-                var cars = DataManager<Car>.DeserializeArray(filename);
-                Execute(cars);
-                System.Console.WriteLine("------------------------------");
+                string datafile = String.Format(DatafileTemplate, i);
+                string resultsFile = String.Format(ResultsFileTemplate, i);
+                var cars = DataManager<Car>.DeserializeArray(datafile);
+                var sortedCars = Execute(cars, threadCount);
+                string header = $"| {"Model",-6} | {"Price",-8} | P. | {"Initial",-8} | Monthly |";
+                DataManager<Car>.ToFile(sortedCars, resultsFile, header);
+
+                Console.WriteLine();
             }
         }
 

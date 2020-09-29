@@ -48,6 +48,10 @@ namespace L1a.Models
             return this.ComputedValue().CompareTo(other.ComputedValue());
         }
 
+        public string ToTableRow()
+        {
+            return $"| {Model,-6} | {Price,8} | {Period,2} | {InitialPayment,8} | {ComputedValue(),7} |";
+        }
 
         public override string ToString()
         {

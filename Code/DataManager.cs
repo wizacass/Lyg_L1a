@@ -1,4 +1,6 @@
 using System.IO;
+using System.Linq;
+using System.Text;
 using L1a.Code.Interfaces;
 using Newtonsoft.Json;
 
@@ -12,6 +14,8 @@ namespace L1a.code
 
     static class DataManager<T> where T : IParsable, IComputable, new()
     {
+        private static int[] Lenghts = { 8, 10, 4, 10, 9 };
+
         public static T[] CreateDataset(int count)
         {
             var objects = new T[count];
@@ -54,6 +58,44 @@ namespace L1a.code
             string text = File.ReadAllText(filename);
             var data = JsonConvert.DeserializeObject<T[]>(text);
             return data;
+        }
+
+        public static void ToFile(T[] data, string filename, string header = null)
+        {
+            using var writer = new StreamWriter(filename);
+            if (header != null)
+            {
+                writer.WriteLine(TableSeparator());
+                writer.WriteLine(header);
+            }
+            writer.WriteLine(TableSeparator());
+            if (data.Length == 0)
+            {
+                int len = Lenghts.Sum() / 2 - 4;
+                writer.WriteLine($"|{new string(' ', len + 1)}No elements!{new string(' ', len)}|");
+                writer.WriteLine($"+{new string('-', Lenghts.Sum() + Lenghts.Count() - 1)}+");
+                return;
+            }
+
+            foreach (var item in data)
+            {
+                writer.WriteLine(item.ToTableRow());
+            }
+            writer.WriteLine(TableSeparator());
+        }
+
+        private static string TableSeparator()
+        {
+            var sb = new StringBuilder();
+
+            sb.Append('+');
+            foreach (int amount in Lenghts)
+            {
+                sb.Append('-', amount);
+                sb.Append('+');
+            }
+
+            return sb.ToString();
         }
     }
 }
